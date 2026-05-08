@@ -12,7 +12,29 @@ function App() {
   const [minRange, setMinRange] = useState(1);
   const [maxRange, setMaxRange] = useState(151);
 
+  const [difficulty, setDifficulty] = useState("easy");
   const [numToWin, setNumToWin] = useState(0);
+
+  const difficulties = [
+    { name: "Easy", count: 5 },
+    { name: "Medium", count: 10 },
+    { name: "Hard", count: 20 },
+    { name: "Pokemon Champion", count: "all" },
+  ];
+
+  // Helper
+  const currentDiffIndex = difficulties.findIndex((diff) => {
+    // 1. Calculate the current max possible
+    const totalAvailable = maxRange - minRange + 1;
+
+    // 2. Check if it matches a standard number (5, 10, 20)
+    if (diff.count === numToFetch) return true;
+
+    // 3. Special Check: Is this the "Champion" option AND is the user maxed out?
+    if (diff.count === "all" && numToFetch >= totalAvailable) return true;
+
+    return false;
+  });
 
   // Data Holder for Pokemon Generations
   const generations = [
@@ -26,6 +48,24 @@ function App() {
   const currentGenIndex = generations.findIndex(
     (gen) => gen.min === minRange && gen.max === maxRange,
   );
+
+  const handleDifficultyChange = (e) => {
+    const diffIndex = e.target.value;
+    if (diffIndex === "") return;
+
+    const selectedDiff = difficulties[diffIndex];
+
+    if (selectedDiff.count !== "all") {
+      setNumToFetch(selectedDiff.count);
+    }
+    if (selectedDiff.count === "all") {
+      // Math: (Max - Min) + 1 gives us the total count
+      const totalAvailable = maxRange - minRange + 1;
+      setNumToFetch(totalAvailable);
+    } else {
+      setNumToFetch(selectedDiff.count);
+    }
+  };
 
   // Input Logic for selecting a Generation via the Generation Dropdown
   const handleGenChange = (e) => {
@@ -82,13 +122,16 @@ function App() {
 
   //   Start the Game. Create an Array via Promises and Populate the List
   const fetchPokemon = async () => {
-    // Lock in the Victory Number when we start the game, reset the score and the clicked IDs array for a clean slate
-    setNumToWin(numToFetch);
+    // Reset the score and the clicked IDs array for a clean slate. Make sure the NumToWin is <= totalAvailable Cards
     setScore(0);
     setClickedIds([]);
 
+    const totalAvailable = maxRange - minRange + 1;
+    const actualNum = Math.min(numToFetch, totalAvailable);
+    setNumToWin(actualNum);
+
     // 1. Create an array of IDs [1, 2, ..., 12]
-    const ids = getUniqueRandomIds(numToFetch, minRange, maxRange);
+    const ids = getUniqueRandomIds(actualNum, minRange, maxRange);
 
     // 2. Map those IDs into an array of Promises (fetch calls)
     const promises = ids.map(async (id) => {
@@ -118,6 +161,18 @@ function App() {
       </header>
 
       <div className="inputSettings">
+        <select
+          value={currentDiffIndex !== -1 ? currentDiffIndex : ""}
+          onChange={handleDifficultyChange}
+        >
+          <option value="">Custom / Select a Difficulty</option>
+          {difficulties.map((diff, index) => (
+            <option key={diff.name} value={index}>
+              {diff.name}
+            </option>
+          ))}
+        </select>
+
         <label>
           Number of Cards:
           <input
