@@ -8,27 +8,18 @@ function App() {
   const [highScore, setHighScore] = useState(0);
   const [clickedIds, setClickedIds] = useState([]);
 
-  useEffect(() => {
-    const fetchPokemon = async () => {
-      const pokemonData = [];
+  const pokemonCount = 12;
+  const minId = 1;
+  const maxId = 493;
 
-      for (let i = 1; i <= 12; i++) {
-        const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${i}`);
-        const data = await response.json();
-
-        // Push a clean object into our temporary array
-        pokemonData.push({
-          id: data.id,
-          name: data.name,
-          image: data.sprites.other["official-artwork"].front_default,
-        });
-      }
-
-      setPokemonList(pokemonData);
-    };
-
-    fetchPokemon();
-  }, []);
+  const getUniqueRandomIds = (count, min, max) => {
+    const ids = new Set();
+    while (ids.size < count) {
+      const randomId = Math.floor(Math.random() * (max - min + 1)) + min;
+      ids.add(randomId);
+    }
+    return Array.from(ids);
+  };
 
   // Creates a shuffled copy of the array
   const shuffleCards = (cards) => {
@@ -54,6 +45,31 @@ function App() {
       //   if newScore == 12... Win
     }
   };
+
+  useEffect(() => {
+    const fetchPokemon = async () => {
+      // 1. Create an array of IDs [1, 2, ..., 12]
+      const ids = getUniqueRandomIds(pokemonCount, minId, maxId);
+
+      // 2. Map those IDs into an array of Promises (fetch calls)
+      const promises = ids.map(async (id) => {
+        const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`);
+        const data = await response.json();
+        return {
+          id: data.id,
+          name: data.name,
+          image: data.sprites.other["official-artwork"].front_default,
+        };
+      });
+
+      // 3. Wait for all promises to resolve
+      const results = await Promise.all(promises);
+
+      setPokemonList(results);
+    };
+
+    fetchPokemon();
+  }, []);
 
   return (
     <div className="App">
