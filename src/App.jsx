@@ -12,6 +12,25 @@ function App() {
   const [minRange, setMinRange] = useState(1);
   const [maxRange, setMaxRange] = useState(151);
 
+  // Data Holder for Pokemon Generations
+  const generations = [
+    { name: "All Generations", min: 1, max: 493 },
+    { name: "Generation 1", min: 1, max: 151 },
+    { name: "Generation 2", min: 152, max: 251 },
+    { name: "Generation 3", min: 252, max: 386 },
+  ];
+
+  // Input Logic for selecting a Generation via the Generation Dropdown
+  const handleGenChange = (e) => {
+    const genIndex = e.target.value;
+    if (genIndex === "") return; // Handle the placeholder case
+
+    const selectedGen = generations[genIndex];
+    setMinRange(selectedGen.min);
+    setMaxRange(selectedGen.max);
+  };
+
+  // Get Random IDs to Populate with
   const getUniqueRandomIds = (count, min, max) => {
     const ids = new Set();
     while (ids.size < count) {
@@ -26,7 +45,7 @@ function App() {
     return [...cards].sort(() => Math.random() - 0.5);
   };
 
-  // Shuffle and Score
+  // Click a Card. Shuffle and Score
   const handleCardClick = (id) => {
     setPokemonList(shuffleCards(pokemonList));
 
@@ -46,6 +65,7 @@ function App() {
     }
   };
 
+  //   Start the Game. Create an Array via Promises and Populate the List
   const fetchPokemon = async () => {
     // 1. Create an array of IDs [1, 2, ..., 12]
     const ids = getUniqueRandomIds(numToFetch, minRange, maxRange);
@@ -102,10 +122,14 @@ function App() {
             onChange={(e) => setMaxRange(parseInt(e.target.value))}
           />
         </label>
-        <label>
-          Pokemon Generation
-          {/* Some Dropdown Menu to select Gens 1-3 */}
-        </label>
+        <select onChange={handleGenChange}>
+          <option value="">Select a Generation</option>
+          {generations.map((gen, index) => (
+            <option key={gen.name} value={index}>
+              {gen.name}
+            </option>
+          ))}
+        </select>
       </div>
       <div className="startButton">
         <button onClick={fetchPokemon}>I choose you!</button>
