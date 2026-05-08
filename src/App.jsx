@@ -12,6 +12,8 @@ function App() {
   const [minRange, setMinRange] = useState(1);
   const [maxRange, setMaxRange] = useState(151);
 
+  const [numToWin, setNumToWin] = useState(0);
+
   // Data Holder for Pokemon Generations
   const generations = [
     { name: "All Generations", min: 1, max: 493 },
@@ -19,6 +21,11 @@ function App() {
     { name: "Generation 2", min: 152, max: 251 },
     { name: "Generation 3", min: 252, max: 386 },
   ];
+
+  //    Helper to see if we have a Generation selected or not
+  const currentGenIndex = generations.findIndex(
+    (gen) => gen.min === minRange && gen.max === maxRange,
+  );
 
   // Input Logic for selecting a Generation via the Generation Dropdown
   const handleGenChange = (e) => {
@@ -61,12 +68,25 @@ function App() {
       if (newScore > highScore) {
         setHighScore(newScore);
       }
-      //   if newScore == 12... Win
+      //   if (newScore === numToWin) {
+      //     {
+      //       score === numToWin && numToWin > 0 && (
+      //         <div className="victory-message">
+      //           <h2>🎉 Victory! You caught all {numToWin} Pokemon! 🎉</h2>
+      //         </div>
+      //       );
+      //     }
+      //   }
     }
   };
 
   //   Start the Game. Create an Array via Promises and Populate the List
   const fetchPokemon = async () => {
+    // Lock in the Victory Number when we start the game, reset the score and the clicked IDs array for a clean slate
+    setNumToWin(numToFetch);
+    setScore(0);
+    setClickedIds([]);
+
     // 1. Create an array of IDs [1, 2, ..., 12]
     const ids = getUniqueRandomIds(numToFetch, minRange, maxRange);
 
@@ -122,8 +142,11 @@ function App() {
             onChange={(e) => setMaxRange(parseInt(e.target.value))}
           />
         </label>
-        <select onChange={handleGenChange}>
-          <option value="">Select a Generation</option>
+        <select
+          value={currentGenIndex !== -1 ? currentGenIndex : ""}
+          onChange={handleGenChange}
+        >
+          <option value="">Custom / Select a Generation</option>
           {generations.map((gen, index) => (
             <option key={gen.name} value={index}>
               {gen.name}
@@ -134,6 +157,12 @@ function App() {
       <div className="startButton">
         <button onClick={fetchPokemon}>I choose you!</button>
       </div>
+
+      {score === numToWin && numToWin > 0 && (
+        <div className="victory-message">
+          <h2>🎉 Victory! You caught all {numToWin} Pokemon! 🎉</h2>
+        </div>
+      )}
 
       <div className="card-container">
         {pokemonList.map((pokemon) => (
