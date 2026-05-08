@@ -8,9 +8,9 @@ function App() {
   const [highScore, setHighScore] = useState(0);
   const [clickedIds, setClickedIds] = useState([]);
 
-  const pokemonCount = 12;
-  const minId = 1;
-  const maxId = 493;
+  const [numToFetch, setNumToFetch] = useState(12);
+  const [minRange, setMinRange] = useState(1);
+  const [maxRange, setMaxRange] = useState(151);
 
   const getUniqueRandomIds = (count, min, max) => {
     const ids = new Set();
@@ -46,30 +46,26 @@ function App() {
     }
   };
 
-  useEffect(() => {
-    const fetchPokemon = async () => {
-      // 1. Create an array of IDs [1, 2, ..., 12]
-      const ids = getUniqueRandomIds(pokemonCount, minId, maxId);
+  const fetchPokemon = async () => {
+    // 1. Create an array of IDs [1, 2, ..., 12]
+    const ids = getUniqueRandomIds(numToFetch, minRange, maxRange);
 
-      // 2. Map those IDs into an array of Promises (fetch calls)
-      const promises = ids.map(async (id) => {
-        const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`);
-        const data = await response.json();
-        return {
-          id: data.id,
-          name: data.name,
-          image: data.sprites.other["official-artwork"].front_default,
-        };
-      });
+    // 2. Map those IDs into an array of Promises (fetch calls)
+    const promises = ids.map(async (id) => {
+      const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`);
+      const data = await response.json();
+      return {
+        id: data.id,
+        name: data.name,
+        image: data.sprites.other["official-artwork"].front_default,
+      };
+    });
 
-      // 3. Wait for all promises to resolve
-      const results = await Promise.all(promises);
+    // 3. Wait for all promises to resolve
+    const results = await Promise.all(promises);
 
-      setPokemonList(results);
-    };
-
-    fetchPokemon();
-  }, []);
+    setPokemonList(results);
+  };
 
   return (
     <div className="App">
@@ -80,6 +76,40 @@ function App() {
           <p>Best Score: {highScore}</p>
         </div>
       </header>
+
+      <div className="inputSettings">
+        <label>
+          Number of Cards:
+          <input
+            type="number"
+            value={numToFetch}
+            onChange={(e) => setNumToFetch(parseInt(e.target.value))}
+          />
+        </label>
+        <label>
+          Start ID:
+          <input
+            type="number"
+            value={minRange}
+            onChange={(e) => setMinRange(parseInt(e.target.value))}
+          />
+        </label>
+        <label>
+          Max ID:
+          <input
+            type="number"
+            value={maxRange}
+            onChange={(e) => setMaxRange(parseInt(e.target.value))}
+          />
+        </label>
+        <label>
+          Pokemon Generation
+          {/* Some Dropdown Menu to select Gens 1-3 */}
+        </label>
+      </div>
+      <div className="startButton">
+        <button onClick={fetchPokemon}>I choose you!</button>
+      </div>
 
       <div className="card-container">
         {pokemonList.map((pokemon) => (
