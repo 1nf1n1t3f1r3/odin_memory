@@ -374,7 +374,19 @@ function App() {
       {isGameOver && (
         <div className="modal">
           {isVictorious ? (
-            <h2>🎉 Victory! Caught all {numToWin}! 🎉</h2>
+            <h2>
+              {numToWin >= 1000
+                ? `👑 The Very Best! Caught ${numToWin} Pokémon! Gotta catch 'em all!`
+                : numToWin >= 151
+                  ? `🏆 Beat Rival Blue! Caught ${numToWin} Pokémon. That's an entire Generation!`
+                  : numToWin >= 50
+                    ? `🌊 Beat Misty! Caught ${numToWin} Pokémon. Caught any Bug Pokémon?`
+                    : numToWin >= 25
+                      ? `🚀 Beat Team Rocket! Caught ${numToWin} Pokémon! Prepare for trouble!`
+                      : numToWin >= 15
+                        ? `🪨 Beat Brock! Bred ${numToWin} Pokémon! Brock on!`
+                        : `🩳 Beat Youngster Joey! Caught ${numToWin} Pokémon with their shorts down!`}
+            </h2>
           ) : (
             <div className="defeat-content">
               <h2>Hey, don't be a thief!</h2>
@@ -382,7 +394,7 @@ function App() {
                 You already caught{" "}
                 <strong>{lastClickedName.toUpperCase()}</strong>!
               </p>
-              <button onClick={prepareGame}>Try Again</button>
+              <button onClick={prepareGame}>Try Again?</button>
             </div>
           )}
         </div>
