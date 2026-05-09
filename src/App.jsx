@@ -36,7 +36,45 @@ function App() {
 
   // ... inside your App component
   const regionalDexes = [
-    { name: "Gold/Silver/Crystal", ids: regionalPokedexes.gsc },
+    { name: "National: Generation IX", ids: regionalPokedexes.national },
+    {
+      name: "Kanto: Red/Blue/Green/Yellow/FireRed/LeafGreen",
+      ids: regionalPokedexes.rbgy,
+    },
+    { name: "Johto: Gold/Silver/Crystal", ids: regionalPokedexes.gsc },
+    { name: "Hoenn: Ruby/Sapphire", ids: regionalPokedexes.rs },
+    { name: "Hoenn: Emerald", ids: regionalPokedexes.emerald },
+    { name: "Sinnoh: Diamond/Pearl", ids: regionalPokedexes.dp },
+    { name: "Sinnoh: Platinum", ids: regionalPokedexes.platinum },
+    { name: "Johto: Heartgold/Soulsilver", ids: regionalPokedexes.hgss },
+    {
+      name: "Unova: Black/White/Black 2/White 2",
+      ids: regionalPokedexes.bwb2w2,
+    },
+    { name: "Kalos: X/Y", ids: regionalPokedexes.xy },
+    { name: "Hoenn: Omega Ruby/Alpha Saphhire", ids: regionalPokedexes.ORAS },
+    { name: "Alola: Sun/Moon", ids: regionalPokedexes.sm },
+    { name: "Alola: Ultra Sun/Ultra Moon", ids: regionalPokedexes.usum },
+    {
+      name: "Kanto: Let's go Pikachu/Let's go Eevee",
+      ids: regionalPokedexes.lgplge,
+    },
+    {
+      name: "Sinnoh: Brilliant Diamond/Shining Pearl",
+      ids: regionalPokedexes.bdsp,
+    },
+    {
+      name: "Hisui: Legends:Arceus",
+      ids: regionalPokedexes.la,
+    },
+    {
+      name: "Paldea: Scarlet & Violet",
+      ids: regionalPokedexes.sv,
+    },
+    {
+      name: "Kalos: Legends:Z-A",
+      ids: regionalPokedexes.za,
+    },
   ];
 
   // --- Logic Helpers ---
