@@ -61,6 +61,13 @@ function App() {
     { name: "Generation 3", min: 252, max: 386 },
   ];
 
+  const regionalDexes = [
+    { name: "National (Gen 1-4)", id: "1" }, // National Dex
+    { name: "Kanto (Original)", id: "2" }, // Kanto
+    { name: "Johto (Original)", id: "3" }, // Johto
+    { name: "Sinnoh (Diamond/Pearl)", id: "5" }, // Sinnoh
+  ];
+
   //    Helper to see if we have a Generation selected or not
   const currentGenIndex = generations.findIndex(
     (gen) => gen.min === minRange && gen.max === maxRange,
@@ -94,14 +101,18 @@ function App() {
     setMaxRange(selectedGen.max);
   };
 
-  // Get Random IDs to Populate with
-  const getUniqueRandomIds = (count, min, max) => {
-    const ids = new Set();
-    while (ids.size < count) {
-      const randomId = Math.floor(Math.random() * (max - min + 1)) + min;
-      ids.add(randomId);
+  const getRandomSelection = (count, idPool) => {
+    const selectedIds = new Set();
+
+    // Safety check to prevent infinite loops!
+    const actualCount = Math.min(count, idPool.length);
+
+    while (selectedIds.size < actualCount) {
+      const randomIndex = Math.floor(Math.random() * idPool.length);
+      selectedIds.add(idPool[randomIndex]);
     }
-    return Array.from(ids);
+
+    return Array.from(selectedIds);
   };
 
   // Creates a shuffled copy of the array
@@ -138,18 +149,35 @@ function App() {
     }
   };
 
+  //   const fetchPokemon = async () => {
+  //     let idsToPickFrom = [];
+
+  //     if (isRegionalMode) {
+  //       const allIdsInDex = dexData.pokemon_entries.map((entry) => {
+  //         const url = entry.pokemon_species.url;
+  //         const parts = url.split("/");
+  //         return parts[parts.length - 2];
+  //       });
+  //     } else {
+  //       // 1. Create a simple range from minRange to maxRange
+  //       // 2. Put those IDs into idsToPickFrom
+  //     }
+
+  //     // From here, the logic is exactly the same!
+  //     // We pick random IDs from idsToPickFrom and fetch their data.
+  //   };
+
   //   Start the Game. Create an Array via Promises and Populate the List
-  const fetchPokemon = async () => {
+  const fetchPokemon = async (finalIdList) => {
     // Make sure the NumToWin is <= totalAvailable Cards.
-    const totalAvailable = maxRange - minRange + 1;
-    const actualNum = Math.min(numToFetch, totalAvailable);
+
+    const actualNum = finalIdList.length;
     setNumToWin(actualNum);
 
     // Store the rules
     setActiveRules({
       target: actualNum,
-      min: minRange,
-      max: maxRange,
+      ids: finalIdList,
     });
 
     // Reset the score and the clicked IDs array for a clean slate.
@@ -160,10 +188,10 @@ function App() {
     setIsDefeated(false);
 
     // 1. Create an array of IDs [1, 2, ..., 12]
-    const ids = getUniqueRandomIds(actualNum, minRange, maxRange);
+    const ids = getRandomSelection(actualNum, idPool);
 
-    // 2. Map those IDs into an array of Promises (fetch calls)
-    const promises = ids.map(async (id) => {
+    // 4. Fetch the data using the provided IDs
+    const promises = finalIdList.map(async (id) => {
       const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`);
       const data = await response.json();
       return {
@@ -173,9 +201,7 @@ function App() {
       };
     });
 
-    // 3. Wait for all promises to resolve
     const results = await Promise.all(promises);
-
     setPokemonList(results);
   };
 
