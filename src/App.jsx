@@ -15,6 +15,13 @@ function App() {
   const [difficulty, setDifficulty] = useState("easy");
   const [numToWin, setNumToWin] = useState(0);
 
+  // Rules display
+  const [activeRules, setActiveRules] = useState({
+    target: 0,
+    min: 1,
+    max: 151,
+  });
+
   const difficulties = [
     { name: "Easy", count: 5 },
     { name: "Medium", count: 10 },
@@ -108,27 +115,26 @@ function App() {
       if (newScore > highScore) {
         setHighScore(newScore);
       }
-      //   if (newScore === numToWin) {
-      //     {
-      //       score === numToWin && numToWin > 0 && (
-      //         <div className="victory-message">
-      //           <h2>🎉 Victory! You caught all {numToWin} Pokemon! 🎉</h2>
-      //         </div>
-      //       );
-      //     }
-      //   }
     }
   };
 
   //   Start the Game. Create an Array via Promises and Populate the List
   const fetchPokemon = async () => {
-    // Reset the score and the clicked IDs array for a clean slate. Make sure the NumToWin is <= totalAvailable Cards
-    setScore(0);
-    setClickedIds([]);
-
+    // Make sure the NumToWin is <= totalAvailable Cards.
     const totalAvailable = maxRange - minRange + 1;
     const actualNum = Math.min(numToFetch, totalAvailable);
     setNumToWin(actualNum);
+
+    // Store the rules
+    setActiveRules({
+      target: actualNum,
+      min: minRange,
+      max: maxRange,
+    });
+
+    // Reset the score and the clicked IDs array for a clean slate.
+    setScore(0);
+    setClickedIds([]);
 
     // 1. Create an array of IDs [1, 2, ..., 12]
     const ids = getUniqueRandomIds(actualNum, minRange, maxRange);
@@ -212,6 +218,19 @@ function App() {
       <div className="startButton">
         <button onClick={fetchPokemon}>I choose you!</button>
       </div>
+
+      {activeRules.target > 0 && (
+        <div className="game-status-bar">
+          <p>
+            Currently catching <strong>{activeRules.target}</strong> Pokémon
+            from ID <strong>{activeRules.min}</strong> to{" "}
+            <strong>{activeRules.max}</strong>
+          </p>
+          <p>
+            Score: {score} / {activeRules.target}
+          </p>
+        </div>
+      )}
 
       {score === numToWin && numToWin > 0 && (
         <div className="victory-message">
