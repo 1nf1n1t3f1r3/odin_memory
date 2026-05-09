@@ -99,6 +99,16 @@ function App() {
     setIdInputStrings(newInputs);
   };
 
+  const handleRegionalSelect = (e) => {
+    const selectedDex = regionalDexes.find(
+      (dex) => dex.name === e.target.value,
+    );
+    if (selectedDex) {
+      // Replace everything with the preset range + a fresh empty box
+      setIdInputStrings([selectedDex.ids, ""]);
+    }
+  };
+
   const handleCardClick = (id) => {
     if (isGameOver) return;
     setPokemonList(shuffleCards(pokemonList));
@@ -198,20 +208,38 @@ function App() {
           />
         </div>
 
-        <div className="manual-input-section">
-          <h3>
-            Custom ID Entry (e.g. "1-151" for Generation 1 or "25" for Pikachu)
-          </h3>
-          {idInputStrings.map((str, index) => (
-            <input
-              key={index}
-              type="text"
-              value={str}
-              placeholder="Enter range..."
-              onChange={(e) => handleManualInputChange(index, e.target.value)}
-            />
-          ))}
+        <div className="preset-section">
+          <label>Quick Select Region: </label>
+          <select onChange={handleRegionalSelect} defaultValue="">
+            <option value="" disabled>
+              -- Choose a Region --
+            </option>
+            {regionalDexes.map((dex) => (
+              <option key={dex.name} value={dex.name}>
+                {dex.name}
+              </option>
+            ))}
+          </select>
         </div>
+
+        {/* 2. Manual Entry (Hidden by default for Power Users) */}
+        <details className="manual-details">
+          <summary>Advanced: Custom ID Entry ⚙️</summary>
+          <div className="manual-input-section">
+            <p className="help-text">
+              Mix and match! Use ranges (1-151) or single IDs (25).
+            </p>
+            {idInputStrings.map((str, index) => (
+              <input
+                key={index}
+                type="text"
+                value={str}
+                placeholder="Enter range..."
+                onChange={(e) => handleManualInputChange(index, e.target.value)}
+              />
+            ))}
+          </div>
+        </details>
 
         <button className="start-btn" onClick={prepareGame}>
           I Choose You!
