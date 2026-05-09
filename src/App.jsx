@@ -42,27 +42,34 @@ function App() {
       ids: regionalPokedexes.rbgy,
     },
     { name: "Johto: Gold/Silver/Crystal", ids: regionalPokedexes.gsc },
-    { name: "Hoenn: Ruby/Sapphire", ids: regionalPokedexes.rs },
-    { name: "Hoenn: Emerald", ids: regionalPokedexes.emerald },
-    { name: "Sinnoh: Diamond/Pearl", ids: regionalPokedexes.dp },
-    { name: "Sinnoh: Platinum", ids: regionalPokedexes.platinum },
+    { name: "Hoenn: Ruby/Sapphire/Emerald", ids: regionalPokedexes.rse },
+
+    {
+      name: "Sinnoh: Diamond/Pearl/Brilliant Diamond/Shining Pearl",
+      ids: regionalPokedexes.dp,
+    },
+    { name: "Sinnoh: Platinum", ids: regionalPokedexes.plat },
     { name: "Johto: Heartgold/Soulsilver", ids: regionalPokedexes.hgss },
     {
-      name: "Unova: Black/White/Black 2/White 2",
-      ids: regionalPokedexes.bwb2w2,
+      name: "Unova: Black/White",
+      ids: regionalPokedexes.bw,
     },
-    { name: "Kalos: X/Y", ids: regionalPokedexes.xy },
-    { name: "Hoenn: Omega Ruby/Alpha Saphhire", ids: regionalPokedexes.ORAS },
+    {
+      name: "Unova: Black 2/White 2",
+      ids: regionalPokedexes.b2w2,
+    },
+    { name: "Kalos Central: X/Y", ids: regionalPokedexes.xycentral },
+    { name: "Kalos Coastal: X/Y", ids: regionalPokedexes.xycoastal },
+    { name: "Kalos Mountain: X/Y", ids: regionalPokedexes.xymountain },
+
+    { name: "Hoenn: Omega Ruby/Alpha Saphhire", ids: regionalPokedexes.oras },
     { name: "Alola: Sun/Moon", ids: regionalPokedexes.sm },
     { name: "Alola: Ultra Sun/Ultra Moon", ids: regionalPokedexes.usum },
     {
       name: "Kanto: Let's go Pikachu/Let's go Eevee",
       ids: regionalPokedexes.lgplge,
     },
-    {
-      name: "Sinnoh: Brilliant Diamond/Shining Pearl",
-      ids: regionalPokedexes.bdsp,
-    },
+
     {
       name: "Hisui: Legends:Arceus",
       ids: regionalPokedexes.la,
@@ -71,10 +78,10 @@ function App() {
       name: "Paldea: Scarlet & Violet",
       ids: regionalPokedexes.sv,
     },
-    {
-      name: "Kalos: Legends:Z-A",
-      ids: regionalPokedexes.za,
-    },
+    // {
+    //   name: "Kalos: Legends:Z-A",
+    //   ids: regionalPokedexes.za,
+    // },
   ];
 
   // --- Logic Helpers ---
