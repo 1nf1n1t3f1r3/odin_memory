@@ -1,147 +1,120 @@
 import "./App.css";
-
 import { useState, useEffect } from "react";
 
 function App() {
+  // --- Game State ---
   const [pokemonList, setPokemonList] = useState([]);
   const [score, setScore] = useState(0);
   const [highScore, setHighScore] = useState(0);
   const [clickedIds, setClickedIds] = useState([]);
 
-  const [numToFetch, setNumToFetch] = useState(12);
-  const [minRange, setMinRange] = useState(1);
-  const [maxRange, setMaxRange] = useState(151);
-
-  const [difficulty, setDifficulty] = useState("easy");
+  // --- Configuration State ---
+  const [requestedCount, setRequestedCount] = useState(12);
+  const [idInputStrings, setIdInputStrings] = useState([""]); // The dynamic input boxes
   const [numToWin, setNumToWin] = useState(0);
 
+  // --- UI/Status State ---
   const [isGameOver, setIsGameOver] = useState(false);
-  const [isDefeated, setIsDefeated] = useState(false);
   const [isVictorious, setIsVictorious] = useState(false);
   const [lastClickedName, setLastClickedName] = useState("");
-
-  // Rules display
   const [activeRules, setActiveRules] = useState({
     target: 0,
-    min: 1,
-    max: 151,
+    description: "",
   });
 
+  // --- Constants & Data ---
   const difficulties = [
     { name: "Easy", count: 10 },
     { name: "Medium", count: 15 },
     { name: "Hard", count: 25 },
-    { name: "Pokemon Champion", count: "all" },
-  ];
-
-  // Helper
-  const currentDiffIndex = difficulties.findIndex((diff) => {
-    // 1. Calculate the current max possible
-    const totalAvailable = maxRange - minRange + 1;
-
-    // 2. Check if it matches a standard number (5, 10, 20)
-    if (diff.count === numToFetch) return true;
-
-    // 3. Special Check: Is this the "Champion" option AND is the user maxed out And >= 50 Pokemons?
-    if (
-      diff.count === "all" &&
-      numToFetch >= totalAvailable &&
-      totalAvailable >= 50
-    )
-      return true;
-
-    return false;
-  });
-
-  // Data Holder for Pokemon Generations
-  const generations = [
-    { name: "All Generations", min: 1, max: 493 },
-    { name: "Generation 1", min: 1, max: 151 },
-    { name: "Generation 2", min: 152, max: 251 },
-    { name: "Generation 3", min: 252, max: 386 },
+    { name: "Pokemon Champion", count: 2500 },
   ];
 
   const regionalDexes = [
-    { name: "National (Gen 1-4)", id: "1" }, // National Dex
-    { name: "Kanto (Original)", id: "2" }, // Kanto
-    { name: "Johto (Original)", id: "3" }, // Johto
-    { name: "Sinnoh (Diamond/Pearl)", id: "5" }, // Sinnoh
+    { name: "National (Gen 1-4)", ids: "1-493" },
+    { name: "Kanto (Original)", ids: "1-151" },
+    { name: "Johto (Original)", ids: "152-251" },
+    { name: "Sinnoh (DP)", ids: "387-493" },
   ];
 
-  //    Helper to see if we have a Generation selected or not
-  const currentGenIndex = generations.findIndex(
-    (gen) => gen.min === minRange && gen.max === maxRange,
-  );
+  // --- Logic Helpers ---
 
-  const handleDifficultyChange = (e) => {
-    const diffIndex = e.target.value;
-    if (diffIndex === "") return;
+  // --- 1. The Parser Helper ---
+  const parseIdInputs = (inputArray) => {
+    const pool = new Set();
 
-    const selectedDiff = difficulties[diffIndex];
+    inputArray.forEach((str) => {
+      const trimmed = str.trim();
+      if (!trimmed) return;
 
-    if (selectedDiff.count !== "all") {
-      setNumToFetch(selectedDiff.count);
-    }
-    if (selectedDiff.count === "all") {
-      // Math: (Max - Min) + 1 gives us the total count
-      const totalAvailable = maxRange - minRange + 1;
-      setNumToFetch(totalAvailable);
-    } else {
-      setNumToFetch(selectedDiff.count);
-    }
-  };
+      // Handle Ranges (e.g., "1-151")
+      if (trimmed.includes("-")) {
+        const [start, end] = trimmed
+          .split("-")
+          .map((num) => parseInt(num.trim()));
+        if (!isNaN(start) && !isNaN(end)) {
+          // Ensure we handle reverse ranges like 10-1 gracefully
+          const min = Math.min(start, end);
+          const max = Math.max(start, end);
+          for (let i = min; i <= max; i++) {
+            pool.add(i);
+          }
+        }
+      }
+      // Handle Single IDs (e.g., "25")
+      else {
+        const id = parseInt(trimmed);
+        if (!isNaN(id)) pool.add(id);
+      }
+    });
 
-  // Input Logic for selecting a Generation via the Generation Dropdown
-  const handleGenChange = (e) => {
-    const genIndex = e.target.value;
-    if (genIndex === "") return; // Handle the placeholder case
-
-    const selectedGen = generations[genIndex];
-    setMinRange(selectedGen.min);
-    setMaxRange(selectedGen.max);
+    return Array.from(pool);
   };
 
   const getRandomSelection = (count, idPool) => {
-    const selectedIds = new Set();
-
-    // Safety check to prevent infinite loops!
+    const selected = new Set();
     const actualCount = Math.min(count, idPool.length);
 
-    while (selectedIds.size < actualCount) {
+    while (selected.size < actualCount) {
       const randomIndex = Math.floor(Math.random() * idPool.length);
-      selectedIds.add(idPool[randomIndex]);
+      selected.add(idPool[randomIndex]);
     }
-
-    return Array.from(selectedIds);
+    return Array.from(selected);
   };
 
-  // Creates a shuffled copy of the array
-  const shuffleCards = (cards) => {
-    return [...cards].sort(() => Math.random() - 0.5);
+  const shuffleCards = (cards) => [...cards].sort(() => Math.random() - 0.5);
+
+  // --- Event Handlers ---
+
+  const handleManualInputChange = (index, value) => {
+    // Use a Regex to remove any character that isn't a digit or a dash
+    const cleanValue = value.replace(/[^0-9-]/g, "");
+
+    const newInputs = [...idInputStrings];
+    newInputs[index] = cleanValue;
+
+    if (index === idInputStrings.length - 1 && cleanValue.trim() !== "") {
+      newInputs.push("");
+    }
+    setIdInputStrings(newInputs);
   };
 
-  // Click a Card. Shuffle and Score
   const handleCardClick = (id) => {
-    if (isGameOver === true) return;
+    if (isGameOver) return;
     setPokemonList(shuffleCards(pokemonList));
 
     if (clickedIds.includes(id)) {
       setScore(0);
       setClickedIds([]);
       setIsGameOver(true);
-      setIsDefeated(true);
       const loser = pokemonList.find((p) => p.id === id);
-      setLastClickedName(loser.name);
+      setLastClickedName(loser?.name || "Unknown");
     } else {
       const newScore = score + 1;
       setScore(newScore);
       setClickedIds([...clickedIds, id]);
 
-      // Update High Score if current score beats it
-      if (newScore > highScore) {
-        setHighScore(newScore);
-      }
-
+      if (newScore > highScore) setHighScore(newScore);
       if (newScore >= numToWin) {
         setIsGameOver(true);
         setIsVictorious(true);
@@ -149,49 +122,36 @@ function App() {
     }
   };
 
-  //   const fetchPokemon = async () => {
-  //     let idsToPickFrom = [];
+  // --- The "Brain" (Coming Soon) ---
+  // This is where we will eventually parse the strings and call loadGameWithIds
+  // --- 2. The "Brain" (Wired to the button) ---
+  const prepareGame = () => {
+    // Convert all those text boxes into a flat list of numbers
+    const finalPool = parseIdInputs(idInputStrings);
 
-  //     if (isRegionalMode) {
-  //       const allIdsInDex = dexData.pokemon_entries.map((entry) => {
-  //         const url = entry.pokemon_species.url;
-  //         const parts = url.split("/");
-  //         return parts[parts.length - 2];
-  //       });
-  //     } else {
-  //       // 1. Create a simple range from minRange to maxRange
-  //       // 2. Put those IDs into idsToPickFrom
-  //     }
+    if (finalPool.length === 0) {
+      alert("Please enter at least one valid Pokémon ID or range!");
+      return;
+    }
 
-  //     // From here, the logic is exactly the same!
-  //     // We pick random IDs from idsToPickFrom and fetch their data.
-  //   };
+    // Pass the pool to the loader
+    loadGameWithIds(finalPool);
+  };
 
-  //   Start the Game. Create an Array via Promises and Populate the List
-  const fetchPokemon = async (finalIdList) => {
-    // Make sure the NumToWin is <= totalAvailable Cards.
+  const loadGameWithIds = async (finalIdList) => {
+    const idsToFetch = getRandomSelection(requestedCount, finalIdList);
+    const actualNum = idsToFetch.length;
 
-    const actualNum = finalIdList.length;
     setNumToWin(actualNum);
+    setActiveRules({ target: actualNum, description: "Custom Selection" });
 
-    // Store the rules
-    setActiveRules({
-      target: actualNum,
-      ids: finalIdList,
-    });
-
-    // Reset the score and the clicked IDs array for a clean slate.
+    // Reset game state
     setScore(0);
     setClickedIds([]);
     setIsGameOver(false);
     setIsVictorious(false);
-    setIsDefeated(false);
 
-    // 1. Create an array of IDs [1, 2, ..., 12]
-    const ids = getRandomSelection(actualNum, idPool);
-
-    // 4. Fetch the data using the provided IDs
-    const promises = finalIdList.map(async (id) => {
+    const promises = idsToFetch.map(async (id) => {
       const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`);
       const data = await response.json();
       return {
@@ -208,102 +168,84 @@ function App() {
   return (
     <div className="App">
       <header className="header">
-        <h1>Pokemon Memory Game</h1>
+        <h1>Pokémon Memory Game</h1>
         <div className="scoreboard">
           <p>Current Score: {score}</p>
           <p>Best Score: {highScore}</p>
         </div>
       </header>
 
-      <div className="inputSettings">
-        <select
-          value={currentDiffIndex !== -1 ? currentDiffIndex : ""}
-          onChange={handleDifficultyChange}
-        >
-          <option value="">Custom / Select a Difficulty</option>
-          {difficulties.map((diff, index) => (
-            <option key={diff.name} value={index}>
-              {diff.name}
-            </option>
-          ))}
-        </select>
+      <section className="controls">
+        <div className="difficulty-settings">
+          <label>Difficulty:</label>
+          <select
+            onChange={(e) =>
+              setRequestedCount(difficulties[e.target.value].count)
+            }
+          >
+            {difficulties.map((diff, index) => (
+              <option key={diff.name} value={index}>
+                {diff.name}
+              </option>
+            ))}
+          </select>
 
-        <label>
-          Number of Cards:
+          <label>Custom Count:</label>
           <input
             type="number"
-            value={numToFetch}
-            onChange={(e) => setNumToFetch(parseInt(e.target.value))}
+            value={typeof requestedCount === "number" ? requestedCount : 0}
+            onChange={(e) => setRequestedCount(parseInt(e.target.value) || 0)}
           />
-        </label>
-        <label>
-          Start ID:
-          <input
-            type="number"
-            value={minRange}
-            onChange={(e) => setMinRange(parseInt(e.target.value))}
-          />
-        </label>
-        <label>
-          Max ID:
-          <input
-            type="number"
-            value={maxRange}
-            onChange={(e) => setMaxRange(parseInt(e.target.value))}
-          />
-        </label>
-        <select
-          value={currentGenIndex !== -1 ? currentGenIndex : ""}
-          onChange={handleGenChange}
-        >
-          <option value="">Custom / Select a Generation</option>
-          {generations.map((gen, index) => (
-            <option key={gen.name} value={index}>
-              {gen.name}
-            </option>
+        </div>
+
+        <div className="manual-input-section">
+          <h3>
+            Custom ID Entry (e.g. "1-151" for Generation 1 or "25" for Pikachu)
+          </h3>
+          {idInputStrings.map((str, index) => (
+            <input
+              key={index}
+              type="text"
+              value={str}
+              placeholder="Enter range..."
+              onChange={(e) => handleManualInputChange(index, e.target.value)}
+            />
           ))}
-        </select>
-      </div>
-      <div className="startButton">
-        <button onClick={fetchPokemon}>I choose you!</button>
-      </div>
+        </div>
+
+        <button className="start-btn" onClick={prepareGame}>
+          I Choose You!
+        </button>
+      </section>
 
       {activeRules.target > 0 && (
         <div className="game-status-bar">
           <p>
-            Currently catching <strong>{activeRules.target}</strong> Pokémon
-            from ID <strong>{activeRules.min}</strong> to{" "}
-            <strong>{activeRules.max}</strong>
-          </p>
-          <p>
-            Score: {score} / {activeRules.target}
+            Catching <strong>{numToWin}</strong> Pokémon | Score: {score}/
+            {numToWin}
           </p>
         </div>
       )}
 
-      {isGameOver && isVictorious && (
-        <div className="victory-message">
-          <h2>🎉 Victory! You caught all {numToWin} Pokemon! 🎉</h2>
+      {/* Modals for Victory/Defeat */}
+      {isGameOver && (
+        <div className="modal">
+          {isVictorious ? (
+            <h2>🎉 Victory! Caught all {numToWin}! 🎉</h2>
+          ) : (
+            <div className="defeat-content">
+              <h2>Hey, don't be a thief!</h2>
+              <p>
+                You already caught{" "}
+                <strong>{lastClickedName.toUpperCase()}</strong>!
+              </p>
+              <button onClick={prepareGame}>Try Again</button>
+            </div>
+          )}
         </div>
       )}
 
-      {isGameOver && isDefeated && !isVictorious && (
-        <div className="defeat-modal">
-          <div className="defeat-content">
-            <h2>Hey, don't be a thief!</h2>
-            <p>
-              That <strong>{lastClickedName.toUpperCase()}</strong> was already
-              caught! Even a Magikarp could remember that.
-            </p>
-            <p>
-              Final Score: {score} / {activeRules.target}
-            </p>
-            <button onClick={fetchPokemon}>Try Again</button>
-          </div>
-        </div>
-      )}
-
-      <div className="card-container">
+      <main className="card-container">
         {pokemonList.map((pokemon) => (
           <div
             key={pokemon.id}
@@ -316,7 +258,7 @@ function App() {
             </p>
           </div>
         ))}
-      </div>
+      </main>
     </div>
   );
 }
