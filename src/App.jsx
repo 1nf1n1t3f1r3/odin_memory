@@ -1,6 +1,9 @@
 import "./App.css";
 import { useState, useEffect } from "react";
 
+// Regional Pokedexes
+import { regionalPokedexes } from "./pokedexData";
+
 function App() {
   // --- Game State ---
   const [pokemonList, setPokemonList] = useState([]);
@@ -30,11 +33,9 @@ function App() {
     { name: "Pokemon Champion", count: 2500 },
   ];
 
+  // ... inside your App component
   const regionalDexes = [
-    { name: "National (Gen 1-4)", ids: "1-493" },
-    { name: "Kanto (Original)", ids: "1-151" },
-    { name: "Johto (Original)", ids: "152-251" },
-    { name: "Sinnoh (DP)", ids: "387-493" },
+    { name: "Gold/Silver/Crystal", ids: regionalPokedexes.gsc },
   ];
 
   // --- Logic Helpers ---
@@ -99,13 +100,49 @@ function App() {
     setIdInputStrings(newInputs);
   };
 
+  // regional select helper
+  const squashConsecutive = (ids) => {
+    if (ids.length === 0) return [];
+
+    const result = [];
+    let start = ids[0];
+    let last = ids[0];
+
+    for (let i = 1; i <= ids.length; i++) {
+      const current = ids[i];
+
+      // Check if the current number is exactly 1 more than the last one
+      if (current && Number(current) === Number(last) + 1) {
+        last = current;
+      } else {
+        // The chain broke! Save what we have.
+        if (start === last) {
+          result.push(`${start}`); // Just one number
+        } else {
+          result.push(`${start}-${last}`); // A range
+        }
+        // Start a new chain
+        start = current;
+        last = current;
+      }
+    }
+    return result;
+  };
+
   const handleRegionalSelect = (e) => {
     const selectedDex = regionalDexes.find(
       (dex) => dex.name === e.target.value,
     );
+
     if (selectedDex) {
-      // Replace everything with the preset range + a fresh empty box
-      setIdInputStrings([selectedDex.ids, ""]);
+      // 1. Take the raw IDs (e.g. ["152", "153", "154", "16"])
+      const rawIds = selectedDex.ids;
+
+      // 2. Squash them into ranges (e.g. ["152-154", "16"])
+      const squashedRanges = squashConsecutive(rawIds);
+
+      // 3. Set the state with our new list + the empty growth box
+      setIdInputStrings([...squashedRanges, ""]);
     }
   };
 
@@ -132,8 +169,6 @@ function App() {
     }
   };
 
-  // --- The "Brain" (Coming Soon) ---
-  // This is where we will eventually parse the strings and call loadGameWithIds
   // --- 2. The "Brain" (Wired to the button) ---
   const prepareGame = () => {
     // Convert all those text boxes into a flat list of numbers
