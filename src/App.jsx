@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 
 // Regional Pokedexes
 import { regionalPokedexes } from "./pokedexData";
+import { pokemonNames } from "./pokedexData";
 
 function App() {
   // --- Game State ---
@@ -127,6 +128,18 @@ function App() {
       }
     }
     return result;
+  };
+
+  const getHintForInput = (inputStr) => {
+    if (!inputStr) return "";
+
+    // 1. Get the first number (handles "152-160" or just "152")
+    const firstId = inputStr.split("-")[0].trim();
+
+    // 2. Look it up in our big list
+    const name = pokemonNames[firstId];
+
+    return name ? `${name}` : "";
   };
 
   const handleRegionalSelect = (e) => {
@@ -264,14 +277,22 @@ function App() {
             <p className="help-text">
               Mix and match! Use ranges (1-151) or single IDs (25).
             </p>
+
+            <div></div>
             {idInputStrings.map((str, index) => (
-              <input
-                key={index}
-                type="text"
-                value={str}
-                placeholder="Enter range..."
-                onChange={(e) => handleManualInputChange(index, e.target.value)}
-              />
+              <div>
+                {" "}
+                <input
+                  key={index}
+                  type="text"
+                  value={str}
+                  placeholder="Enter range..."
+                  onChange={(e) =>
+                    handleManualInputChange(index, e.target.value)
+                  }
+                />
+                <span className="name-hint">{getHintForInput(str)}</span>
+              </div>
             ))}
           </div>
         </details>

@@ -1,5 +1,18 @@
 // pokedexData.js
 
+// pokedexData.js
+export const pokemonNames = {
+  1: "Bulbasaur",
+  2: "Ivysaur",
+  3: "Venusaur",
+  16: "Beedrill",
+  95: "Onyx",
+  // ... this list goes on
+  152: "Chikorita",
+  153: "Bayleef",
+  // ...
+};
+
 export const regionalPokedexes = {
   gsc: [
     "152",
