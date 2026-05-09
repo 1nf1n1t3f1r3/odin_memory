@@ -317,7 +317,7 @@ function App() {
 
         {/* 2. Manual Entry (Hidden by default for Power Users) */}
         <details className="manual-details">
-          <summary>Advanced: Custom ID Entry ⚙️</summary>
+          <summary>Advanced: Custom ID Entry</summary>
           <div className="manual-input-section">
             <p className="help-text">
               Mix and match! Use ranges (1-151) or single IDs (25).
@@ -339,6 +339,20 @@ function App() {
                 <span className="name-hint">{getHintForInput(str)}</span>
               </div>
             ))}
+          </div>
+        </details>
+        <details>
+          <summary>National Dex Reference</summary>
+          {/* 3. National Dex Reference (Inside the same details or a new one) */}
+          <div className="dex-reference-container">
+            <div className="dex-list">
+              {Object.entries(pokemonNames).map(([id, name]) => (
+                <div key={id} className="dex-item">
+                  <span className="dex-id">#{id} </span>
+                  <span className="dex-name">{name}</span>
+                </div>
+              ))}
+            </div>
           </div>
         </details>
 
