@@ -15,6 +15,11 @@ function App() {
   const [difficulty, setDifficulty] = useState("easy");
   const [numToWin, setNumToWin] = useState(0);
 
+  const [isGameOver, setIsGameOver] = useState(false);
+  const [isDefeated, setIsDefeated] = useState(false);
+  const [isVictorious, setIsVictorious] = useState(false);
+  const [lastClickedName, setLastClickedName] = useState("");
+
   // Rules display
   const [activeRules, setActiveRules] = useState({
     target: 0,
@@ -101,11 +106,16 @@ function App() {
 
   // Click a Card. Shuffle and Score
   const handleCardClick = (id) => {
+    if (isGameOver === true) return;
     setPokemonList(shuffleCards(pokemonList));
 
     if (clickedIds.includes(id)) {
       setScore(0);
       setClickedIds([]);
+      setIsGameOver(true);
+      setIsDefeated(true);
+      const loser = pokemonList.find((p) => p.id === id);
+      setLastClickedName(loser.name);
     } else {
       const newScore = score + 1;
       setScore(newScore);
@@ -114,6 +124,11 @@ function App() {
       // Update High Score if current score beats it
       if (newScore > highScore) {
         setHighScore(newScore);
+      }
+
+      if (newScore >= numToWin) {
+        setIsGameOver(true);
+        setIsVictorious(true);
       }
     }
   };
@@ -135,6 +150,9 @@ function App() {
     // Reset the score and the clicked IDs array for a clean slate.
     setScore(0);
     setClickedIds([]);
+    setIsGameOver(false);
+    setIsVictorious(false);
+    setIsDefeated(false);
 
     // 1. Create an array of IDs [1, 2, ..., 12]
     const ids = getUniqueRandomIds(actualNum, minRange, maxRange);
@@ -232,9 +250,25 @@ function App() {
         </div>
       )}
 
-      {score === numToWin && numToWin > 0 && (
+      {isGameOver && isVictorious && (
         <div className="victory-message">
           <h2>🎉 Victory! You caught all {numToWin} Pokemon! 🎉</h2>
+        </div>
+      )}
+
+      {isGameOver && isDefeated && !isVictorious && (
+        <div className="defeat-modal">
+          <div className="defeat-content">
+            <h2>Hey, don't be a thief!</h2>
+            <p>
+              That <strong>{lastClickedName.toUpperCase()}</strong> was already
+              caught! Even a Magikarp could remember that.
+            </p>
+            <p>
+              Final Score: {score} / {activeRules.target}
+            </p>
+            <button onClick={fetchPokemon}>Try Again</button>
+          </div>
         </div>
       )}
 
