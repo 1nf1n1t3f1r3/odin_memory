@@ -28,9 +28,9 @@ function App() {
   });
 
   const difficulties = [
-    { name: "Easy", count: 5 },
-    { name: "Medium", count: 10 },
-    { name: "Hard", count: 20 },
+    { name: "Easy", count: 10 },
+    { name: "Medium", count: 15 },
+    { name: "Hard", count: 25 },
     { name: "Pokemon Champion", count: "all" },
   ];
 
@@ -42,8 +42,13 @@ function App() {
     // 2. Check if it matches a standard number (5, 10, 20)
     if (diff.count === numToFetch) return true;
 
-    // 3. Special Check: Is this the "Champion" option AND is the user maxed out?
-    if (diff.count === "all" && numToFetch >= totalAvailable) return true;
+    // 3. Special Check: Is this the "Champion" option AND is the user maxed out And >= 50 Pokemons?
+    if (
+      diff.count === "all" &&
+      numToFetch >= totalAvailable &&
+      totalAvailable >= 50
+    )
+      return true;
 
     return false;
   });
