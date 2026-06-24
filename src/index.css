@@ -1,3 +1,5 @@
+@import url("https://fonts.cdnfonts.com/css/pokemon-solid");
+
 /* --- Global Reset & Variables --- */
 :root {
   --poke-red: #ef5350;
@@ -40,11 +42,26 @@ body {
 }
 
 .header h1 {
-  font-size: 2rem;
+  font-family: "Pokemon Solid", "Arial Black", sans-serif;
+  font-size: 3rem;
   margin: 0;
-  background: linear-gradient(45deg, var(--poke-red), var(--poke-yellow));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  letter-spacing: 5px;
+
+  color: var(--poke-yellow);
+
+  /* Silly Complex Multiple text-shadows layered to create the thick blue 3D border */
+  text-shadow:
+    -3px -3px 0 var(--poke-blue),
+    3px -3px 0 var(--poke-blue),
+    -3px 3px 0 var(--poke-blue),
+    3px 3px 0 var(--poke-blue),
+    -4px 0px 0 var(--poke-blue),
+    4px 0px 0 var(--poke-blue),
+    0px -4px 0 var(--poke-blue),
+    0px 4px 0 var(--poke-blue),
+    5px 5px 0px rgba(0, 0, 0, 0.4); /* Subtle dark drop shadow for depth */
+
+  transform: skewX(-15deg);
 }
 
 .scoreboard {
@@ -207,6 +224,27 @@ body {
   cursor: pointer;
   transition: background 0.2s;
   width: 100%;
+
+  font-family: "Pokemon Solid", "Arial Black", sans-serif;
+  font-size: 2rem;
+  margin: 0;
+  letter-spacing: 5px;
+
+  color: var(--poke-yellow);
+
+  /* Silly Complex Multiple text-shadows layered to create the thick blue 3D border */
+  text-shadow:
+    -3px -3px 0 var(--poke-blue),
+    3px -3px 0 var(--poke-blue),
+    -3px 3px 0 var(--poke-blue),
+    3px 3px 0 var(--poke-blue),
+    -4px 0px 0 var(--poke-blue),
+    4px 0px 0 var(--poke-blue),
+    0px -4px 0 var(--poke-blue),
+    0px 4px 0 var(--poke-blue),
+    5px 5px 0px rgba(0, 0, 0, 0.4); /* Subtle dark drop shadow for depth */
+
+  transform: skewX(-15deg);
 }
 
 .start-btn:hover {
