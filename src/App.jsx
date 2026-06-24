@@ -2,6 +2,12 @@ import "./App.css";
 import { useState } from "react";
 import { regionalPokedexes, pokemonNames } from "./pokedexData";
 
+// --- Import Your Sub-Components (Partials) ---
+import Header from "./components/Header";
+import GameControls from "./components/GameControls";
+import GameGrid from "./components/GameGrid";
+import GameModal from "./components/GameModal"; // If you split the modal too!
+
 // --- Static Constants (Moved outside to prevent re-renders) ---
 const DIFFICULTIES = [
   { name: "Easy", count: 10 },
@@ -214,101 +220,20 @@ function App() {
 
   return (
     <div className="App">
-      <header className="header">
-        <h1>Pokémon Memory Game</h1>
-        <div className="scoreboard">
-          <div className="score-badge">
-            Current Score: <span>{score}</span>
-          </div>
-          <div className="score-badge high">
-            Best Score: <span>{highScore}</span>
-          </div>
-        </div>
-      </header>
+      <Header score={score} highScore={highScore} />
 
-      <section className="controls">
-        <div className="control-group">
-          <div className="setting">
-            <label>Difficulty</label>
-            <select
-              onChange={(e) =>
-                setRequestedCount(DIFFICULTIES[e.target.value].count)
-              }
-            >
-              {DIFFICULTIES.map((diff, index) => (
-                <option key={diff.name} value={index}>
-                  {diff.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="setting">
-            <label>Custom Count</label>
-            <input
-              type="number"
-              value={requestedCount || 0}
-              onChange={(e) => setRequestedCount(parseInt(e.target.value) || 0)}
-            />
-          </div>
-
-          <div className="setting">
-            <label>Quick Select Region</label>
-            <select onChange={handleRegionalSelect} defaultValue="">
-              <option value="" disabled>
-                -- Choose a Region --
-              </option>
-              {REGIONAL_DEXES.map((dex) => (
-                <option key={dex.name} value={dex.name}>
-                  {dex.name}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        <div className="advanced-controls">
-          <details className="manual-details">
-            <summary>🛠️ Advanced: Custom ID Entry</summary>
-            <p className="help-text">
-              Mix and match! Use ranges (1-151) or single IDs (25).
-            </p>
-            <div className="manual-input-section">
-              {idInputStrings.map((str, index) => (
-                <div key={index} className="input-row">
-                  <input
-                    type="text"
-                    value={str}
-                    placeholder="e.g. 1-151"
-                    onChange={(e) =>
-                      handleManualInputChange(index, e.target.value)
-                    }
-                  />
-                  <span className="name-hint">{getHintForInput(str)}</span>
-                </div>
-              ))}
-            </div>
-          </details>
-
-          <details className="manual-details">
-            <summary>📕 National Dex Reference</summary>
-            <div className="dex-reference-container">
-              <div className="dex-list">
-                {Object.entries(pokemonNames).map(([id, name]) => (
-                  <div key={id} className="dex-item">
-                    <span className="dex-id">#{id}</span>
-                    <span className="dex-name">{name}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </details>
-        </div>
-
-        <button className="start-btn" onClick={prepareGame}>
-          I Choose You!
-        </button>
-      </section>
+      <GameControls
+        requestedCount={requestedCount}
+        setRequestedCount={setRequestedCount}
+        idInputStrings={idInputStrings}
+        handleManualInputChange={handleManualInputChange}
+        handleRegionalSelect={handleRegionalSelect}
+        getHintForInput={getHintForInput}
+        prepareGame={prepareGame}
+        difficulties={DIFFICULTIES}
+        regionalDexes={REGIONAL_DEXES}
+        pokemonNames={pokemonNames}
+      />
 
       {numToWin > 0 && (
         <div className="game-status-bar">
@@ -322,47 +247,16 @@ function App() {
       )}
 
       {isGameOver && (
-        <div className="modal-overlay">
-          <div className="modal">
-            {isVictorious ? (
-              <div className="victory-content">
-                <h2>{getVictoryMessage()}</h2>
-                <button className="start-btn" onClick={prepareGame}>
-                  Play Again
-                </button>
-              </div>
-            ) : (
-              <div className="defeat-content">
-                <h2>Hey, don't be a thief!</h2>
-                <p>
-                  You already caught{" "}
-                  <strong>{lastClickedName.toUpperCase()}</strong>!
-                </p>
-                <button className="start-btn" onClick={prepareGame}>
-                  Try Again?
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
+        <GameModal
+          isVictorious={isVictorious}
+          lastClickedName={lastClickedName}
+          getVictoryMessage={getVictoryMessage}
+          onRestart={prepareGame}
+        />
       )}
 
-      <main className="card-container">
-        {pokemonList.map((pokemon) => (
-          <div
-            key={pokemon.id}
-            className="card"
-            onClick={() => handleCardClick(pokemon.id)}
-          >
-            <div className="card-image-wrapper">
-              <img src={pokemon.image} alt={pokemon.name} />
-            </div>
-            <p className="card-name">
-              {pokemon.name.charAt(0).toUpperCase() + pokemon.name.slice(1)}
-            </p>
-          </div>
-        ))}
-      </main>
+      {/* Actual Game */}
+      <GameGrid pokemonList={pokemonList} onCardClick={handleCardClick} />
     </div>
   );
 }
